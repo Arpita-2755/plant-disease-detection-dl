@@ -54,5 +54,5 @@ BASELINE = dict(filters=(16, 32, 64, 128), dense=96, dropout=0.4, lr=1e-3, epoch
 TRANSFER = dict(alpha=1.0, dropout=0.3, head_lr=1e-3, head_epochs=6,
                 ft_lr=1e-4, ft_epochs=8, unfreeze_from="block_13_expand")
 TUNE = dict(lr=(3e-3, 1e-3, 3e-4), dropout=(0.2, 0.4), batch=(16, 64), epochs=12)
-AE = dict(epochs=11, lr=1e-3, batch=32, noise=0.10, vae_latent=64, vae_epochs=10, vae_beta=0.5)
+AE = dict(epochs=10, denoise_epochs=5, lr=2e-3, batch=32, noise=0.10, vae_latent=64, vae_epochs=8, vae_beta=0.5)
 FGSM_EPS = (0.0, 0.0025, 0.005, 0.01, 0.02, 0.04, 0.08)   # in [0, 1] pixel units

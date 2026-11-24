@@ -73,6 +73,25 @@ def build_autoencoder(name="autoencoder", img=C.AE_IMG, latent_ch=16) -> keras.M
     return keras.Model(inp, out, name=name)
 
 
+def build_denoiser(img=C.AE_IMG) -> keras.Model:
+    """Denoising autoencoder with skip connections.
+
+    A plain bottleneck must discard fine detail together with the noise; skips let
+    the decoder reuse high-resolution features, so only the noise is removed.
+    """
+    inp = keras.Input((img, img, 3), name="image")
+    e1 = L.Conv2D(32, 3, strides=2, padding="same", activation="relu", name="enc1")(inp)
+    e2 = L.Conv2D(64, 3, strides=2, padding="same", activation="relu", name="enc2")(e1)
+    z = L.Conv2D(64, 3, padding="same", activation="relu", name="code")(e2)
+    d1 = L.Conv2DTranspose(32, 3, strides=2, padding="same", activation="relu", name="dec1")(z)
+    d1 = L.Concatenate(name="skip1")([d1, e1])
+    d2 = L.Conv2DTranspose(24, 3, strides=2, padding="same", activation="relu", name="dec2")(d1)
+    d2 = L.Concatenate(name="skip0")([d2, inp])
+    d3 = L.Conv2D(16, 3, padding="same", activation="relu", name="dec3")(d2)
+    out = L.Conv2D(3, 3, padding="same", activation="sigmoid", name="image_out")(d3)
+    return keras.Model(inp, out, name="denoiser")
+
+
 def encoder_decoder(ae: keras.Model):
     """Split a trained autoencoder into its encoder and decoder halves."""
     enc = keras.Model(ae.input, ae.get_layer("code").output, name="encoder")

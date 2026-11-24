@@ -16,6 +16,24 @@ from tensorflow import keras
 from tensorflow.keras import layers as L
 
 
+def recalibrate_batchnorm(model, xtr, ytr, batches=60, batch=64, momentum=0.95) -> None:
+    """Re-estimate BatchNorm moving statistics on clean training images.
+
+    Augmented batches have different activation statistics from the clean images
+    seen at inference, so the averages collected during training are biased.
+    Weights are not changed and only training images are used.
+    """
+    bns = [l for l in model.layers if isinstance(l, L.BatchNormalization)]
+    old = [l.momentum for l in bns]
+    for l in bns:
+        l.momentum = momentum
+    ds, _ = train_dataset(xtr, ytr, batch, aug=False)
+    for xb, _ in ds.take(batches):
+        model(xb, training=True)
+    for l, m in zip(bns, old):
+        l.momentum = m
+
+
 def fit_demo_model(kind: str, xtr, ytr, xva, yva) -> dict:
     """Three 64x64 models on a deliberately small training set."""
     seed_everything()
@@ -45,6 +63,8 @@ def fit_demo_model(kind: str, xtr, ytr, xva, yva) -> dict:
            if kind == "regularised" else [])
     h = model.fit(ds, steps_per_epoch=steps, epochs=1 if C.FAST else epochs, verbose=0,
                   validation_data=eval_dataset(xva, yva), callbacks=cbs).history
+    if kind == "regularised":
+        recalibrate_batchnorm(model, xtr, ytr)
     _, train_acc = model.evaluate(eval_dataset(xtr, ytr), verbose=0)
     va_loss, va_acc = model.evaluate(eval_dataset(xva, yva), verbose=0)
     res = dict(params=model.count_params(), epochs_run=len(h["loss"]), train_acc=train_acc,
@@ -79,6 +99,16 @@ def fit_experiment() -> None:
     update_metrics("fit_experiment", {"train_images": int(len(pick)), "results": res})
 
 
+def finalize(model, before, xtr, ytr, xva, yva, xte) -> None:
+    """BatchNorm recalibration, then the save / reload check."""
+    recalibrate_batchnorm(model, xtr, ytr)
+    after = model.evaluate(eval_dataset(xva, yva), verbose=0)
+    print(f"BatchNorm recalibration: val acc {before[1]:.4f} -> {after[1]:.4f}", flush=True)
+    update_metrics("baseline", {"val_before_recalibration": before, "val_after_recalibration": after,
+                                "train_acc_final": model.evaluate(eval_dataset(xtr, ytr), verbose=0)[1]})
+    check_save_load(model, C.MODELS / "baseline.keras", xte[:64], "baseline")
+
+
 def main() -> None:
     with timed("fit_experiment"):
         fit_experiment()
@@ -103,8 +133,9 @@ def main() -> None:
         params=model.count_params(), epochs_run=len(hist["loss"]), history=hist,
         best_epoch=int(np.argmin(hist["val_loss"]) + 1), best_val_acc=float(
             hist["val_accuracy"][int(np.argmin(hist["val_loss"]))])))
+    before = model.evaluate(eval_dataset(xva, yva), verbose=0)
+    finalize(model, before, xtr, ytr, xva, yva, xte)
     plot_history(hist, "baseline_curves", "Baseline CNN training")
-    check_save_load(model, C.MODELS / "baseline.keras", xte[:64], "baseline")
     (C.MODELS / "baseline_best.keras").unlink(missing_ok=True)
 
 

@@ -101,7 +101,7 @@ def main() -> None:
                             ("baseline_adv_trained", "Baseline + adversarial training", AQUA, "^")):
         ax.plot(C.FGSM_EPS, acc[k], color=col, marker=mk, ms=7, label=lab)
     ax.axhline(1 / C.NUM_CLASSES, color=INK2, ls=":", lw=1.2)
-    ax.text(C.FGSM_EPS[-1], 1 / C.NUM_CLASSES + 0.012, "random guess", ha="right", fontsize=8, color=INK2)
+    ax.text(0.06, 1 / C.NUM_CLASSES + 0.015, "random guess", ha="center", fontsize=8, color=INK2)
     ax.set(xlabel="FGSM epsilon (fraction of pixel range)", ylabel="Test accuracy", ylim=(0, 1.02),
            title="Accuracy under white-box FGSM")
     ax.legend(loc="upper right")
@@ -125,7 +125,7 @@ def main() -> None:
             tt.append(f"eps={e}\n{C.CLASS_NAMES[q.argmax()]}\n{q.max():.2f}".replace("Yellow leaf curl virus", "YLCV"))
             colors.append("#0b0b0b" if q.argmax() == y[i] else "#d03b3b")
     if ims:
-        image_grid(ims, tt, 5, "fgsm_examples", size=2.0, title_size=7.5, colors=colors)
+        image_grid(ims, tt, 5, "fgsm_examples", size=2.0, title_size=7.5, colors=colors, title_room=0.75)
 
 
 if __name__ == "__main__":

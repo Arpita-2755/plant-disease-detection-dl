@@ -72,7 +72,7 @@ def main() -> None:
             image_grid([x[i] for i in worst],
                        [f"true: {C.CLASS_NAMES[y[i]]}\npred: {C.CLASS_NAMES[yh[i]]} ({p[i].max():.2f})"
                         .replace("Yellow leaf curl virus", "YLCV") for i in worst],
-                       5, f"misclassified_{name}", size=2.1, title_size=7)
+                       5, f"misclassified_{name}", size=2.1, title_size=6.5, title_room=0.5)
 
     a = preds["baseline"].argmax(1) == y
     b = preds["transfer"].argmax(1) == y

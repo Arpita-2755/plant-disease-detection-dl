@@ -43,9 +43,10 @@ def savefig(fig, name: str) -> None:
     print("saved", path.name, flush=True)
 
 
-def image_grid(images, titles, ncols, name, size=1.7, title_size=8, colors=None):
+def image_grid(images, titles, ncols, name, size=1.7, title_size=8, colors=None,
+               title_room=0.35):
     nrows = math.ceil(len(images) / ncols)
-    fig, axes = plt.subplots(nrows, ncols, figsize=(ncols * size, nrows * (size + 0.35)))
+    fig, axes = plt.subplots(nrows, ncols, figsize=(ncols * size, nrows * (size + title_room)))
     for i, ax in enumerate(np.atleast_1d(axes).ravel()):
         ax.axis("off")
         if i < len(images):

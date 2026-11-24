@@ -5,11 +5,12 @@
 from __future__ import annotations
 
 import io
+import math
 
 from src import config as C
 from src.common import (BLUE, ORANGE, EpochLogger, image_grid, load_split, savefig,
                         seed_everything, timed, to_float, update_metrics)
-from src.models import VAE, build_autoencoder, encoder_decoder
+from src.models import VAE, build_autoencoder, build_denoiser, encoder_decoder
 
 import cv2
 import matplotlib.pyplot as plt
@@ -44,6 +45,8 @@ def jpeg_at_most(img: np.ndarray, budget: int):
 def fit(model, xin, xout, vin, vout, name):
     cbs = [keras.callbacks.TensorBoard(str(C.LOGS / name), profile_batch=0),
            keras.callbacks.EarlyStopping("val_loss", patience=4, restore_best_weights=True),
+           keras.callbacks.LearningRateScheduler(lambda ep, lr: C.AE["lr"] * (
+               0.05 + 0.475 * (1 + math.cos(math.pi * ep / C.AE["epochs"])))),
            EpochLogger()]
     return model.fit(xin, xout, validation_data=(vin, vout), batch_size=C.AE["batch"], verbose=0,
                      epochs=1 if C.FAST else C.AE["epochs"], callbacks=cbs).history
@@ -90,7 +93,7 @@ def main() -> None:
         return np.clip(x + g.normal(0, sigma, x.shape), 0, 1).astype(np.float32)
 
     seed_everything()
-    dae = build_autoencoder("denoiser", latent_ch=32)
+    dae = build_denoiser()
     dae.compile(keras.optimizers.Adam(C.AE["lr"]), "mse")
     xn = noisy(xtr, 1)
     with timed("denoiser"):
