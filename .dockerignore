@@ -1,0 +1,11 @@
+.git
+.venv
+venv
+**/__pycache__
+data
+logs
+notebooks
+report
+assets
+tools
+*.md
