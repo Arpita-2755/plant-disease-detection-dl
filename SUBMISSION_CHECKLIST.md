@@ -11,8 +11,11 @@
 
 - [x] Clean virtual environment: `pip install -r requirements.txt` installs and imports
 - [x] `python -m src.prepare_data` downloads the subset and matches all checksums
-- [x] `python -m src.run_all` completed from that clean environment; it produced the reported numbers
+- [x] all stages of `python -m src.run_all` completed from that clean environment and produced the reported numbers (the run was paused once and resumed at the autoencoder stage)
 - [x] App started from the clean environment and driven by Playwright without exceptions
+- [x] Fresh `git clone`: app test passes for 3 models x 10 samples (`python tests/test_app.py`)
+- [x] Two full classifier runs in separate environments gave identical results
+- [x] TensorBoard shown from the project `.venv` (Smart App Control blocked its `grpc` library in the temporary clean copy)
 - [x] Report numbers cross-checked against `metrics.json` (`python tools/verify_submission.py`)
 - [x] Citations checked against Crossref, arXiv or the publisher
 - [x] Report pages rasterised and inspected
@@ -22,6 +25,8 @@
 - Docker image not built: Docker is not installed on the development machine
 - The PDF was exported with Microsoft Word because LibreOffice is not installed
 - Dataset fetched from the authors' Hugging Face mirror, not from tensorflow_datasets
+- Training took 55 minutes in the final run, above the 45-minute target
+- The report has 49 numbered pages plus 7 of front matter
 - No GPU or DGX hardware was used; Chapter 7 is theory and a scaling analysis
 
 ## Before submitting (student)

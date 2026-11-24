@@ -146,6 +146,7 @@ models/         trained .keras models
 notebooks/      executed workflow notebook
 report/         project report (.docx, .pdf)
 src/            data, models, training, evaluation, attacks
+tests/          headless test of the demo app (python tests/test_app.py)
 tools/          screenshots, notebook, docs and report builders
 metrics.json    every measured number
 ```
