@@ -13,6 +13,7 @@ from src.common import (BLUE, ORANGE, image_grid, load_split, predict, savefig, 
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
+import tensorflow as tf
 from scipy.stats import binomtest
 from sklearn.metrics import (accuracy_score, classification_report, confusion_matrix,
                              precision_recall_fscore_support)
@@ -32,12 +33,14 @@ def main() -> None:
         acc = accuracy_score(y, yh)
         pr, rc, f1, _ = precision_recall_fscore_support(y, yh, average="macro", zero_division=0)
         ci = binomtest(int((yh == y).sum()), len(y)).proportion_ci(method="wilson")
-        one = to_float(x[:1])
-        model(one, training=False)
+        one = tf.constant(to_float(x[:1]))
+        graph = tf.function(lambda im: model(im, training=False))     # compiled inference
+        for _ in range(3):
+            graph(one)
         t = time.perf_counter()
-        for _ in range(20):
-            model(one, training=False)
-        ms = (time.perf_counter() - t) / 20 * 1000
+        for _ in range(30):
+            graph(one)
+        ms = (time.perf_counter() - t) / 30 * 1000
         rep = classification_report(y, yh, labels=range(C.NUM_CLASSES), target_names=C.CLASS_NAMES,
                                     output_dict=True, zero_division=0)
         print(f"\n=== {TITLES[name]}: accuracy {acc:.4f} ===")

@@ -42,14 +42,14 @@ def jpeg_at_most(img: np.ndarray, budget: int):
     return best
 
 
-def fit(model, xin, xout, vin, vout, name):
+def fit(model, xin, xout, vin, vout, name, epochs):
     cbs = [keras.callbacks.TensorBoard(str(C.LOGS / name), profile_batch=0),
            keras.callbacks.EarlyStopping("val_loss", patience=4, restore_best_weights=True),
            keras.callbacks.LearningRateScheduler(lambda ep, lr: C.AE["lr"] * (
-               0.05 + 0.475 * (1 + math.cos(math.pi * ep / C.AE["epochs"])))),
+               0.05 + 0.475 * (1 + math.cos(math.pi * ep / epochs)))),
            EpochLogger()]
     return model.fit(xin, xout, validation_data=(vin, vout), batch_size=C.AE["batch"], verbose=0,
-                     epochs=1 if C.FAST else C.AE["epochs"], callbacks=cbs).history
+                     epochs=1 if C.FAST else epochs, callbacks=cbs).history
 
 
 def main() -> None:
@@ -62,7 +62,7 @@ def main() -> None:
     ae = build_autoencoder("autoencoder")
     ae.compile(keras.optimizers.Adam(C.AE["lr"]), "mse")
     with timed("autoencoder"):
-        h = fit(ae, xtr, xtr, xva, xva, "autoencoder")
+        h = fit(ae, xtr, xtr, xva, xva, "autoencoder", C.AE["epochs"])
     ae.save(C.MODELS / "autoencoder.keras")
     enc, dec = encoder_decoder(ae)
     code = run(enc, xte)
@@ -97,7 +97,7 @@ def main() -> None:
     dae.compile(keras.optimizers.Adam(C.AE["lr"]), "mse")
     xn = noisy(xtr, 1)
     with timed("denoiser"):
-        h2 = fit(dae, xn, xtr, noisy(xva, 3), xva, "denoiser")
+        h2 = fit(dae, xn, xtr, noisy(xva, 3), xva, "denoiser", C.AE["denoise_epochs"])
     del xn
     dae.save(C.MODELS / "denoiser.keras")
     nte = noisy(xte, 4)
