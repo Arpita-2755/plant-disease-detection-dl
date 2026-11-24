@@ -19,7 +19,7 @@ Plant leaf disease detection (INT422 Deep Learning). Status as of the final subm
 | 4 | Dockerfile (written; not built, Docker is unavailable on this machine) | Done with limitation |
 | 5 | Architecture, flow and DGX diagrams | Done |
 | 6 | Repository with logical commits | Done |
-| 6 | Push to GitHub (needs the owner's login) | Owner action |
+| 6 | Push to GitHub | Done |
 | 7 | Report in .docx and .pdf | Done |
 | 8 | Clean-venv verification, number cross-check, checklist, viva notes | Done |
 

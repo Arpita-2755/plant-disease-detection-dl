@@ -3,8 +3,7 @@
 ## Deliverables
 
 - [x] **Working demo** - `streamlit run app/app.py` (trained models included in `models/`)
-- [x] **GitHub repository** - committed locally with logical history, ready to push
-- [ ] **Push to GitHub** - needs the owner's login (commands below)
+- [x] **GitHub repository** - https://github.com/Arpita-2755/plant-disease-detection-dl (public)
 - [x] **Report** - `report/Arpita_Mishra_12303670_INT422_Project_Report.docx` and `.pdf`
 
 ## Verified
@@ -31,17 +30,7 @@
 
 ## Before submitting (student)
 
-- [ ] Push the repository and check that the link in the report opens
+- [x] Repository pushed; the link in the report opens
 - [ ] Read the report once, sign the declaration page
 - [ ] Compare the CO1 to CO6 wording in Table 1.1 with the official course handout
 - [ ] Practise with `VIVA_NOTES.md`
-
-## Push commands
-
-Create an empty public repository named `plant-disease-detection-dl` at https://github.com/new (no README), then:
-
-```
-git remote add origin https://github.com/Arpita-2755/plant-disease-detection-dl.git
-git branch -M main
-git push -u origin main
-```
