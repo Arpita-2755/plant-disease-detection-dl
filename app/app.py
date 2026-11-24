@@ -117,19 +117,18 @@ st.title("🌿 Plant Leaf Disease Detection")
 st.write("Upload a photo of a tomato, potato or bell-pepper leaf, or pick a sample. "
          "The samples come from the held-out test set.")
 
-left, right = st.columns([2, 1])
-with left:
-    up = st.file_uploader("Upload a leaf image", type=["jpg", "jpeg", "png", "bmp", "webp"])
-with right:
-    samples = sorted(SAMPLES.glob("*.jpg"))
-    sample = st.selectbox("...or choose a sample", ["(none)"] + [s.stem.replace("_", " ") for s in samples])
-
+samples = sorted(SAMPLES.glob("*.jpg"))
+origin = st.radio("Image source", ["Upload a photo", "Use a sample leaf"], horizontal=True)
 data = None
-if up is not None:
-    data, source = up.getvalue(), f"Uploaded: {up.name}"
-elif sample != "(none)":
-    data = next(s for s in samples if s.stem.replace("_", " ") == sample).read_bytes()
-    source = f"Sample: {sample}"
+if origin == "Upload a photo":
+    up = st.file_uploader("Upload a leaf image", type=["jpg", "jpeg", "png", "bmp", "webp"])
+    if up is not None:
+        data, source = up.getvalue(), f"Uploaded: {up.name}"
+else:
+    sample = st.selectbox("Sample leaf", ["(none)"] + [s.stem.replace("_", " ") for s in samples])
+    if sample != "(none)":
+        data = next(s for s in samples if s.stem.replace("_", " ") == sample).read_bytes()
+        source = f"Sample: {sample}"
 if data is None:
     st.info("Choose an image to start.")
     st.stop()
@@ -191,13 +190,6 @@ with tab_adv:
     sign = fgsm_sign(model, x[None], np.array([top])).numpy()[0]
     adv = np.clip(x + eps * sign, 0, 1)
     q = predict(model, adv)
-    cols = st.columns(3)
-    with cols[0]:
-        show(x, f"Clean: {C.CLASS_NAMES[top]} ({p[top]:.1%})")
-    with cols[1]:
-        show((sign + 1) / 2, "Perturbation direction (sign of gradient)")
-    with cols[2]:
-        show(adv, f"Adversarial: {C.CLASS_NAMES[int(q.argmax())]} ({q.max():.1%})")
     if eps == 0:
         st.info("Epsilon is 0, so the image is unchanged.")
     elif int(q.argmax()) != top:
@@ -205,6 +197,13 @@ with tab_adv:
                  f"with at most {eps * 255:.1f} of 255 grey levels of change per pixel.")
     else:
         st.success(f"Prediction unchanged at epsilon = {eps:.4f}.")
+    cols = st.columns(3)
+    with cols[0]:
+        show(x, f"Clean: {C.CLASS_NAMES[top]} ({p[top]:.1%})")
+    with cols[1]:
+        show((sign + 1) / 2, "Perturbation direction (sign of gradient)")
+    with cols[2]:
+        show(adv, f"Adversarial: {C.CLASS_NAMES[int(q.argmax())]} ({q.max():.1%})")
     st.markdown("**Top-3 probabilities after the attack**")
     st.altair_chart(prob_chart(q), width="stretch")
 

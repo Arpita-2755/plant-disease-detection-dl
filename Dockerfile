@@ -12,6 +12,7 @@ RUN pip install -r requirements.txt
 # Application code, trained models and the metrics shown in the sidebar
 COPY src ./src
 COPY app ./app
+COPY .streamlit ./.streamlit
 COPY models ./models
 COPY metrics.json ./metrics.json
 
